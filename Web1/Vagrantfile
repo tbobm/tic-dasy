@@ -1,0 +1,10 @@
+private_ip = "TBD"
+netmask = "TBD"
+
+Vagrant.configure(2) do |conf|
+    conf.vm.box = "jubianchi/debian-wheezy-jubianchief-i386"
+    conf.vm.define = "web01"
+    conf.vm.hostname = "web1"
+    conf.vm.synced_folder "./web1_docroot", "/var/www"
+    conf.vm.network "private_network", ip: private_ip, net_mask: netmask
+end
