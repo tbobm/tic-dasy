@@ -1,10 +1,25 @@
-private_ip = "TBD"
-netmask = "TBD"
+# vim: set ft=ruby :
+private_ip = "192.168.6.0"
+gateway_ip = "192.168.6.1"
+netmask = "255.255.255.248"
 
 Vagrant.configure(2) do |conf|
-    conf.vm.box = "jubianchi/debian-wheezy-jubianchief-i386"
-    conf.vm.define = "web01"
+    conf.vm.box = "debian/stretch64"
+    conf.vm.define "web01"
     conf.vm.hostname = "web1"
     conf.vm.synced_folder "./web1_docroot", "/var/www"
     conf.vm.network "private_network", ip: private_ip, net_mask: netmask
+    conf.vm.provision "chef_solo" do |chef|
+        chef.cookbooks_path = "../chef-repo/cookbooks"
+        chef.json = {
+            :route => {
+                :apache => {
+                    :default_site_enabled => true
+                },
+                :ip_gateway => gateway_ip
+            }
+        }
+        chef.add_recipe "apache2"
+        chef.add_recipe "default-route"
+    end
 end
