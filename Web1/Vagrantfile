@@ -1,4 +1,5 @@
 # vim: set ft=ruby :
+vm_name = "web_1"
 private_ip = "192.168.6.2"
 gateway_ip = "192.168.6.1"
 netmask = "255.255.255.248"
@@ -7,6 +8,10 @@ recipes = ["apache2", "default-route"]
 
 Vagrant.configure(2) do |conf|
     conf.vm.box = "debian/stretch64"
+    conf.vm.provider :virtualbox do |vb|
+        vb.name = vm_name
+    end
+
     conf.vm.define "web01"
     conf.vm.hostname = "web1"
     conf.vm.synced_folder "./web1_docroot", "/var/www"
