@@ -1,0 +1,34 @@
+# vim: set ft=ruby :
+vm_name = "web_2"
+private_ip = "192.168.6.3"
+gateway_ip = "192.168.6.1"
+netmask = "255.255.255.248"
+cookbook_dir = "../chef-repo/cookbooks"
+recipes = ["apache2", "default-route"]
+
+Vagrant.configure(2) do |conf|
+    conf.vm.box = "debian/stretch64"
+    conf.vm.provider :virtualbox do |vb|
+        vb.name = vm_name
+    end
+
+    conf.vm.define "web02"
+    conf.vm.hostname = "web2"
+    conf.vm.synced_folder "./web2_docroot", "/var/www"
+    conf.vm.network "private_network", ip: private_ip, net_mask: netmask
+    conf.vm.provision "chef_solo" do |chef|
+        chef.cookbooks_path = cookbook_dir
+        chef.json = {
+            :route => {
+                :apache => {
+                    :default_site_enabled => true
+                },
+                :ip_gateway => gateway_ip
+            }
+        }
+        chef.add_recipe "apache2"
+        recipes.each do |recipe|
+            chef.add_recipe recipe
+        end
+    end
+end
