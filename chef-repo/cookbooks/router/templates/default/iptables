@@ -1,0 +1,23 @@
+#!/bin/sh
+
+priv="eth1"
+pub="wlp2s0"
+existing = "ESTABLISHED,RELATED"
+
+iptables -F
+iptables -t nat -F
+iptables -t mangle -F
+iptables -X
+
+iptables -A INPUT -i lo -j ACCEPT
+
+
+iptables -A INPUT -m state --state "$existing" -j ACCEPT
+iptables -A INPUT -m state --state NEW ! -i "$pub" -j ACCEPT
+iptables -A FORWARD -i "$pub" -o "$priv" -m state --state "$existing" -j ACCEPT
+
+iptables -A FORWARD -i "$priv" -o "$pub" -j ACCEPT
+
+iptables -A FORWARD -i "$pub" -o "$priv" -j REJECT
+
+echo 1 > /proc/syss/net/ipv4/ip_forward
