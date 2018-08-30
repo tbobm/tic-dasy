@@ -4,7 +4,7 @@ gateway_ip = "192.168.6.1"
 private_ip = gateway_ip
 netmask = "255.255.255.248"
 cookbook_dir = "../chef-repo/cookbooks"
-recipes = ["apache2", "default-route"]
+recipes = ["default-route", "router"]
 
 Vagrant.configure(2) do |conf|
     conf.vm.box = "debian/stretch64"
@@ -12,17 +12,14 @@ Vagrant.configure(2) do |conf|
         vb.name = vm_name
     end
 
-    conf.vm.define "web01"
-    conf.vm.hostname = "web1"
-    conf.vm.synced_folder "./web1_docroot", "/var/www"
+    conf.vm.define "gateway"
+    conf.vm.hostname = "gateway"
     conf.vm.network "private_network", ip: private_ip, net_mask: netmask
+    conf.vm.network "public_network"
     conf.vm.provision "chef_solo" do |chef|
         chef.cookbooks_path = cookbook_dir
         chef.json = {
             :route => {
-                :apache => {
-                    :default_site_enabled => true
-                },
                 :ip_gateway => gateway_ip
             }
         }
